@@ -4782,18 +4782,18 @@ class NewsAnalyzer:
 
         today = datetime.now().strftime("%Y-%m-%d")
 
-        # 提取今日热点 Top10
-        top_list = stats.get("top_hot_titles", [])
+        # TrendRadar 中 stats 本身就是热点列表
+        top_list = stats  # 不要再 get 了！
+
         top_text = ""
         for i, item in enumerate(top_list[:10]):
             title = item.get("title", "无标题")
-            count = item.get("count", 0)
+            count = item.get("hot_value", item.get("count", 0))
             top_text += f"{i+1}. {title}（热度：{count}）\n"
 
         if not top_text:
             top_text = "今日暂未采集到热点信息，请稍后再试。"
 
-        # 推送早报
         p = PushPlus()
         p.send(
             title=f"{today} 热点早报",
@@ -4808,6 +4808,7 @@ class NewsAnalyzer:
         # ---- 推送结束 ----
 
         return summary_html
+
 
 
 
