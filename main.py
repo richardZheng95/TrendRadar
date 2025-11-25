@@ -1,3 +1,4 @@
+from pushers.pushplus import PushPlus   # ← 新增导入
 
 # coding=utf-8
 
@@ -4749,7 +4750,6 @@ class NewsAnalyzer:
                     html_file_path=html_file,
                 )
 
-from pushers.pushplus import PushPlus   # ← 新增导入
 
 def main():
     try:
