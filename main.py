@@ -4776,15 +4776,17 @@ class NewsAnalyzer:
             else:
                 print(f"HTML报告已生成（Docker环境）: {html_file}")
 
-# ---- PushPlus 推送放在这里 ----
-from pushers.pushplus import PushPlus
-p = PushPlus()
-p.send(
-    title="TrendRadar 热点推送",
-    content= summary_html or "今日热点已生成，可查看 HTML 报告"
-)
-# ---- 推送代码结束 ----
+        # ---- PushPlus 推送放在这里（正确缩进） ----
+        from pushers.pushplus import PushPlus
+        p = PushPlus()
+        p.send(
+            title="TrendRadar 热点推送",
+            content= summary_html or "今日热点已生成，可查看 HTML 报告"
+        )
+        # ---- 推送代码结束 ----
+
         return summary_html
+
 
     def run(self) -> None:
         """执行分析流程"""
