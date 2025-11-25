@@ -1,0 +1,25 @@
+name: TrendRadar PushPlus
+
+on:
+  workflow_dispatch: {}   # 手动触发
+  schedule:
+    - cron: "0 * * * *"   # 每小时自动运行（可删）
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run TrendRadar
+        env:
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+        run: python main.py
