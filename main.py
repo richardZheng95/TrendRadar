@@ -1,5 +1,3 @@
-from pushers.pushplus import PushPlus   # ← 新增导入
-
 # coding=utf-8
 
 import json
@@ -4750,25 +4748,64 @@ class NewsAnalyzer:
                     html_file_path=html_file,
                 )
 
+        # 生成汇总报告（如果需要）
+        summary_html = None
+        if mode_strategy["should_generate_summary"]:
+            if mode_strategy["should_send_realtime"]:
+                # 如果已经发送了实时通知，汇总只生成HTML不发送通知
+                summary_html = self._generate_summary_html(
+                    mode_strategy["summary_mode"]
+                )
+            else:
+                # daily模式：直接生成汇总报告并发送通知
+                summary_html = self._generate_summary_report(mode_strategy)
+
+        # 打开浏览器（仅在非容器环境）
+        if self._should_open_browser() and html_file:
+            if summary_html:
+                summary_url = "file://" + str(Path(summary_html).resolve())
+                print(f"正在打开汇总报告: {summary_url}")
+                webbrowser.open(summary_url)
+            else:
+                file_url = "file://" + str(Path(html_file).resolve())
+                print(f"正在打开HTML报告: {file_url}")
+                webbrowser.open(file_url)
+        elif self.is_docker_container and html_file:
+            if summary_html:
+                print(f"汇总报告已生成（Docker环境）: {summary_html}")
+            else:
+                print(f"HTML报告已生成（Docker环境）: {html_file}")
+
+# ---- PushPlus 推送放在这里 ----
+from pushers.pushplus import PushPlus
+p = PushPlus()
+p.send(
+    title="TrendRadar 热点推送",
+    content= summary_html or "今日热点已生成，可查看 HTML 报告"
+)
+# ---- 推送代码结束 ----
+        return summary_html
+
+    def run(self) -> None:
+        """执行分析流程"""
+        try:
+            self._initialize_and_check_config()
+
+            mode_strategy = self._get_mode_strategy()
+
+            results, id_to_name, failed_ids = self._crawl_data()
+
+            self._execute_mode_strategy(mode_strategy, results, id_to_name, failed_ids)
+
+        except Exception as e:
+            print(f"分析流程执行出错: {e}")
+            raise
+
 
 def main():
     try:
         analyzer = NewsAnalyzer()
         analyzer.run()
-
-        # -----------------------------
-        # 🟢 PushPlus 推送热点（新增）
-        # -----------------------------
-        try:
-            p = PushPlus()
-            p.send(
-                title="TrendRadar 热点推送",
-                content="今日热点分析已完成，请查看报告或等待你自定义的通知格式。"
-            )
-        except Exception as e:
-            print(f"PushPlus 推送失败: {e}")
-        # -----------------------------
-
     except FileNotFoundError as e:
         print(f"❌ 配置文件错误: {e}")
         print("\n请确保以下文件存在:")
