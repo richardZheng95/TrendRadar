@@ -4776,22 +4776,39 @@ class NewsAnalyzer:
             else:
                 print(f"HTML报告已生成（Docker环境）: {html_file}")
 
-        # ---- PushPlus 推送放在这里（正确缩进） ----
+               # ---- PushPlus 推送（带热点 Top10）----
+        from datetime import datetime
         from pushers.pushplus import PushPlus
+
         today = datetime.now().strftime("%Y-%m-%d")
+
+        # 提取今日热点 Top10
+        top_list = stats.get("top_hot_titles", [])
+        top_text = ""
+        for i, item in enumerate(top_list[:10]):
+            title = item.get("title", "无标题")
+            count = item.get("count", 0)
+            top_text += f"{i+1}. {title}（热度：{count}）\n"
+
+        if not top_text:
+            top_text = "今日暂未采集到热点信息，请稍后再试。"
+
+        # 推送早报
         p = PushPlus()
         p.send(
-            title=f"{today}皮皮热点早报",
+            title=f"{today} 热点早报",
             content=(
-                f"{today}的热点分析已完成。\n"
-                f"本次已生成热点报告（HTML + 汇总）。\n"
-                f"运行时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-                f"提示：你可以在本地/报告系统中打开今日 HTML 汇总查看详细榜单。"
+                f"【{today} 热点 Top10】\n\n"
+                f"{top_text}\n"
+                f"———————\n"
+                f"运行时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"（完整榜单请查看 HTML 报告）"
             )
         )
-        # ---- 推送代码结束 ----
+        # ---- 推送结束 ----
 
         return summary_html
+
 
 
     def run(self) -> None:
