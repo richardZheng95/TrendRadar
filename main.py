@@ -4778,10 +4778,16 @@ class NewsAnalyzer:
 
         # ---- PushPlus 推送放在这里（正确缩进） ----
         from pushers.pushplus import PushPlus
+        today = datetime.now().strftime("%Y-%m-%d")
         p = PushPlus()
         p.send(
-            title="TrendRadar 热点推送",
-            content= summary_html or "今日热点已生成，可查看 HTML 报告"
+            title=f"{today}皮皮热点早报",
+            content=(
+                f"{today}的热点分析已完成。\n"
+                f"本次已生成热点报告（HTML + 汇总）。\n"
+                f"运行时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                f"提示：你可以在本地/报告系统中打开今日 HTML 汇总查看详细榜单。"
+            )
         )
         # ---- 推送代码结束 ----
 
